@@ -110,6 +110,13 @@ class tetris {
             this.board[val[i][0]][val[i][1]] = 1
         }
     }
+    _retire() {
+        let i;
+        let val = Object.values(this.falling)
+        for (i = 0; i < val.length; i++) {
+            this.board[val[i][0]][val[i][1]] = 0
+        }
+    }
     _burn() {
         let score = 0;
         let i;
@@ -136,7 +143,7 @@ class tetris {
         let i;
         let val = Object.values(this.falling);
         for (i = 0; i < val.length; i++) {
-            if (val[0] == 24 || (this.board[val[0]++][val[1]] == 1 && this._check(val[0]++, val[1]))) { return true }
+            if (val[i][0] == 24 || (this.board[val[i][0]++][val[1]] == 1 && this._check(val[i][0]++, val[i][1]))) { return true }
         }
         return false
     }
@@ -144,7 +151,7 @@ class tetris {
         let i;
         let val = Object.values(this.falling);
         for (i = 0; i < val.length; i++) {
-            if (val[1] == 9 || (this.board[val[0]][val[1]++] == 1 && this._check(val[0], val[1]++))) { return true }
+            if (val[i][1] == 9 || (this.board[val[i][0]][val[i][1]++] == 1 && this._check(val[i][0], val[i][1]++))) { return true }
         }
         return false
     }
@@ -152,17 +159,11 @@ class tetris {
         let i;
         let val = Object.values(this.falling);
         for (i = 0; i < val.length; i++) {
-            if (val[1] == 0 || (this.board[val[0]][val[1]--] == 1 && this._check(val[0], val[1]--))) { return true }
+            if (val[i][1] == 0 || (this.board[val[i][0]][val[i][1]--] == 1 && this._check(val[i][0], val[i][1]--))) { return true }
         }
         return false
     }
-    _retire() {
-        let i;
-        let val = Object.values(this.falling)
-        for (i = 0; i < val.length; i++) {
-            this.board[val[i][0]][val[i][1]] = 0
-        }
-    }
+
     _check(v1, v2) {
         let i;
         let val = Object.values(this.falling)
@@ -170,5 +171,46 @@ class tetris {
             if (v1 == val[i][0] && v2 == val[i][1]) { return false }
         }
         return true
+    }
+}
+class engine {
+    constructor(canvas) {
+        this.canvas = document.getElementById(canvas);
+        this.canvas.height = 800;
+        this.canvas.width = 400;
+        this.game = new tetris();
+        this.pause = false;
+        this.cvs = this.canvas.getContext('2d')
+        this.start();
+        console.log('run')
+    }
+    start() {
+        this.game.start();
+        let self = this;
+        this.fps = setInterval(function () { self.run(self) }, 100)
+    }
+    run(self) {
+        if (!self.game.alive) { clearInterval(self.fps) }
+        self.game.motion();
+        self.draw();
+        document.addEventListener('keydown', function (e) { self.events(e) })
+    }
+    events(e) {
+        if (e.key == 'ArrowDown') { this.game.motion() }
+        else if (e.key == 'ArrowUp') { this.game.flip() }
+        else if (e.key == 'ArrowLeft') { this.game.left() }
+        else if (e.key == 'ArrowRight') { this.game.right() }
+    }
+    draw() {
+        this.cvs.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        let row, cell;
+        for (row = 5; row < this.game.board.length; row++) {
+            for (cell = 0; cell < this.game.board[row].length; cell++) {
+                this.cvs.fillStyle = 'green';
+                if (this.game.board[row][cell] == 1) {
+                    this.cvs.fillRect(40 * cell, 40 * row, 40, 40);
+                }
+            }
+        }
     }
 }
