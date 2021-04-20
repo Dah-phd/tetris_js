@@ -37,7 +37,7 @@ class tetris {
         this.off = false;
     }
     motion() {
-        if (!this._colision_bot() && !this.off) {
+        if (!this.off) {
             this._retire()
             this.falling['1'][0]++;
             this.falling['2'][0]++;
@@ -50,9 +50,9 @@ class tetris {
         this.block()
     }
     left() {
-        if (this._colision_left() || this.off) {
-            return
-        }
+        // if (this._colision_left() || this.off) {
+        //     return
+        // }
         this._retire()
         this.falling['1'][1]--;
         this.falling['2'][1]--;
@@ -61,9 +61,9 @@ class tetris {
         this._set()
     }
     right() {
-        if (this._colision_left() || this.off) {
-            return
-        }
+        // if (this._colision_left() || this.off) {
+        //     return
+        // }
         this._retire()
         this.falling['1'][1]++;
         this.falling['2'][1]++;
@@ -143,7 +143,7 @@ class tetris {
         let i;
         let val = Object.values(this.falling);
         for (i = 0; i < val.length; i++) {
-            if (val[i][0] == 24 || (this.board[val[i][0]++][val[1]] == 1 && this._check(val[i][0]++, val[i][1]))) { return true }
+            if (val[i][0] == 24 || (this.board[val[i][0]++][val[i][1]] == 1 && this._check(val[i][0]++, val[i][1]))) { console.log(this.falling); return true }
         }
         return false
     }
@@ -208,7 +208,7 @@ class engine {
             for (cell = 0; cell < this.game.board[row].length; cell++) {
                 this.cvs.fillStyle = 'green';
                 if (this.game.board[row][cell] == 1) {
-                    this.cvs.fillRect(40 * cell, 40 * row, 40, 40);
+                    this.cvs.fillRect(40 * cell, 40 * (row - 5), 40, 40);
                 }
             }
         }
