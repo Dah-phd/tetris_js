@@ -26,7 +26,6 @@ class tetris {
         this.block()
     }
     block() {
-        console.log('block')
         this._burn();
         if (this.board[4].includes(1)) {
             this.alive = false;
@@ -38,7 +37,6 @@ class tetris {
             '3': [...this.blocks[this.que]['3']],
             '4': [...this.blocks[this.que]['4']]
         }
-        console.log(this.blocks)
         this.que = randint(0, 6);
         this._set();
         this.off = false;
@@ -78,7 +76,38 @@ class tetris {
         this.falling['4'][1] += 1;
         this._set()
     }
-    flip() { }
+    flip() {
+        if (this._is_square()) { return }
+        this._retire();
+        let base = [...this.falling['2']];
+        let keys = Object.keys(this.falling);
+        let i;
+        let flipped = {};
+        for (i = 0; i < keys.length; i += 1) {
+            if (keys[i] == '2') { flipped['2'] = base; continue }
+            if (this.falling[keys[i]][0] == base[0]) {
+                flipped[keys[i]] = [this.falling[keys[i]][0] - (this.falling[keys[i]][1] - base[1]), base[1]]
+            }
+            else if (this.falling[keys[i]][1] == base[1]) {
+                flipped[keys[i]] = [base[0], this.falling[keys[i]][1] - (base[0] - this.falling[keys[i]][0])]
+            }
+            else {
+                if ((this.falling[keys[i]][0] > base[0] && this.falling[keys[i]][1] > base[1]) || (this.falling[keys[i]][0] < base[0] && this.falling[keys[i]][1] < base[1])) {
+                    flipped[keys[i]] = [this.falling[keys[i]][0] + (base[0] - this.falling[keys[i]][0]) * 2, this.falling[keys[i]][1]]
+                }
+                else {
+                    flipped[keys[i]] = [this.falling[keys[i]][0], (base[1] - this.falling[keys[i]][1]) * 2 + this.falling[keys[i]][1]]
+                }
+            }
+        }
+        for (i = 0; i < keys.length; i += 1) {
+            if (flipped[keys[i]][1] < 0 || flipped[keys[i]][1] > 9 || this.board[flipped[keys[i]][0]][flipped[keys[i]][1]] == 1) {
+                this._set(); return
+            }
+        }
+        this.falling = flipped;
+        this._set()
+    }
     _set() {
         let i;
         let val = Object.values(this.falling)
@@ -94,16 +123,32 @@ class tetris {
         }
     }
     _burn() {
-
+        let row;
+        let score = 0;
+        for (row = 5; row < this.board.length; row += 1) {
+            if (!this.board[row].includes(0)) {
+                this.board.splice(row, 1);
+                this.board.splice(5, 0, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+                score += 10
+            }
+        }
+        if (score > 20) { this.score += score * 3 }
+        else if (score > 10) { this.score += score * 2 }
+        else (this.score += score)
     }
     _is_square() {
-
+        if (this.falling['1'][0] == this.falling['2'][0] && this.falling['3'][0] == this.falling['4'][0]) {
+            if (this.falling['1'][1] == this.falling['3'][1] && this.falling['2'][1] == this.falling['4'][1]) {
+                return true
+            }
+        }
+        return false
     }
     _colision_bot() {
         let i;
         let val = Object.values(this.falling);
         for (i = 0; i < val.length; i++) {
-            if (val[i][0] == 24 || (this.board[val[i][0] + 1][val[i][1]] == 1 && this._check(val[i][0] + 1, val[i][1]))) { console.log('bot', this.off); return true }
+            if (val[i][0] == 24 || (this.board[val[i][0] + 1][val[i][1]] == 1 && this._check(val[i][0] + 1, val[i][1]))) { return true }
         }
         return false
     }
@@ -111,7 +156,7 @@ class tetris {
         let i;
         let val = Object.values(this.falling);
         for (i = 0; i < val.length; i++) {
-            if (val[i][1] == 9 || (this.board[val[i][0]][val[i][1] + 1] == 1 && this._check(val[i][0], val[i][1] + 1))) { console.log('right'); return true }
+            if (val[i][1] == 9 || (this.board[val[i][0]][val[i][1] + 1] == 1 && this._check(val[i][0], val[i][1] + 1))) { return true }
         }
         return false
     }
@@ -119,7 +164,7 @@ class tetris {
         let i;
         let val = Object.values(this.falling);
         for (i = 0; i < val.length; i++) {
-            if (val[i][1] == 0 || (this.board[val[i][0]][val[i][1] - 1] == 1 && this._check(val[i][0], val[i][1] - 1))) { console.log('left'); return true }
+            if (val[i][1] == 0 || (this.board[val[i][0]][val[i][1] - 1] == 1 && this._check(val[i][0], val[i][1] - 1))) { return true }
         }
         return false
     }
@@ -154,7 +199,6 @@ class engine {
         this.fps = setInterval(() => { self.run(self) }, 200)
     }
     run(self) {
-        console.log(self.game.alive)
         if (!self.game.alive) { alert('GAME OVER!\n' + self.game.score.toString()); clearInterval(self.fps) }
         self.game.motion();
         self.draw();
