@@ -1,3 +1,3 @@
 # Translation of TETRIS in JS
 
-work in progress
+basic working version
