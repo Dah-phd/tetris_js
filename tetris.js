@@ -26,12 +26,19 @@ class tetris {
         this.block()
     }
     block() {
+        console.log('block')
         this._burn();
         if (this.board[4].includes(1)) {
             this.alive = false;
             return
         }
-        this.falling = { ...this.blocks[this.que] }
+        this.falling = {
+            '1': [...this.blocks[this.que]['1']],
+            '2': [...this.blocks[this.que]['2']],
+            '3': [...this.blocks[this.que]['3']],
+            '4': [...this.blocks[this.que]['4']]
+        }
+        console.log(this.blocks)
         this.que = randint(0, 6);
         this._set();
         this.off = false;
@@ -96,7 +103,7 @@ class tetris {
         let i;
         let val = Object.values(this.falling);
         for (i = 0; i < val.length; i++) {
-            if (val[i][0] == 24 || (this.board[val[i][0] + 1][val[i][1]] == 1 && this._check(val[i][0] + 1, val[i][1]))) { console.log('bot'); return true }
+            if (val[i][0] == 24 || (this.board[val[i][0] + 1][val[i][1]] == 1 && this._check(val[i][0] + 1, val[i][1]))) { console.log('bot', this.off); return true }
         }
         return false
     }
